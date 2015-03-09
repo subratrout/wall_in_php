@@ -58,6 +58,19 @@ input {
     font-size: 18px;
 }
 
+.btn-comment {
+    background-color: #E58141;
+    height: 40px;
+    width: 145px;
+    border: 2px solid black;
+    margin-top: 10px;
+    margin-left: 450px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+}
+
 .red {
     color: red;
 }

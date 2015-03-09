@@ -20,11 +20,18 @@ require_once('connection.php');
         message_user($_POST);
     }
 
-    else
+    elseif(isset($_POST['action']) && $_POST['action'] == "comment")
+    {
+        comment_user($_POST);
+        header('Location: wall.php');
+    }
+    elseif(isset($_GET['a'])&&$_GET['a']=='logoff')
     {
         session_destroy();
+    }
+    else
+    {
         header('location: index.php');
-        die();
     }
 
     function register_user($post)
@@ -114,9 +121,33 @@ require_once('connection.php');
             $query_message = "INSERT INTO messages (message, user_id, created_at, updated_at) VALUES('{$post['message']}', '{$post['user_id']}', NOW(), NOW())";
             run_mysql_query($query_message);
             $_SESSION['success_message_posted'] = "Message successfully posted!";
+            header('location: wall.php');
             die();
         }
-        var_dump($_POST);
-        die();
+
+    }
+
+    function comment_user($post)
+    {
+        if(empty($post['comment']))
+        {
+            $_SESSION['errors'][] = "Comments can't be blank!";
+        }
+        elseif(strlen($post['comment'])<2)
+        {
+            $_SESSION['errors'][] = "Your comment should be more than 2 characters";
+        }
+
+        else
+        {
+            $query_comment = "INSERT INTO comments (comment, message_id, user_id, created_at, updated_at) VALUES('{$post['comment']}', {$post['message_id']},{$post['user_id']}, NOW(), NOW())";
+            if(!run_mysql_query($query_comment)){
+                $_SESSION['errors'][] = 'Query has failed.';
+                $_SESSION['errors'][] = $query_comment;
+            }
+            ;
+            $_SESSION['success_comment_posted'] = "Comment successfully posted!";
+            header('location: wall.php');
+        }
     }
 ?>
