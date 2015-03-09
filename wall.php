@@ -56,27 +56,45 @@
 <div class="main-container">
   <div class="message">
     <?php
-    $query_message = "SELECT messages.id, messages.created_at, users.first_name, users.last_name, messages.message FROM messages LEFT JOIN users on messages.user_id =users.id";
-    $messsage_results = fetch_all($query_message);
+    $query_message = "SELECT messages.id as id, messages.created_at, users.first_name, users.last_name, messages.message FROM messages LEFT JOIN users on messages.user_id =users.id";
+    $message_results = fetch_all($query_message);
+
     ?>
     <h3> Messages: </h3>
     <?php
-    foreach($messsage_results as $message_row)
+    foreach($message_results as $message_row)
     {
       echo "<p>".$message_row['first_name']." ".$message_row['last_name']."-".$message_row['created_at']."</p>";
       echo "<p>".$message_row['message']."</p>";
+
+
+$query_comments = "SELECT users.first_name, users.last_name, comments.comment, comments.created_at, comments.message_id, messages.user_id FROM users LEFT JOIN messages on users.id=messages.user_id LEFT JOIN comments on comments.message_id=messages.id where messages.id={$message_row['id']}";
+  $comments_results = fetch_all($query_comments);
+
+       foreach ($comments_results as $comment_row)
+       {
+        echo "<p>".$comment_row['first_name']." ".$comment_row['last_name']."-".$comment_row['created_at']."</p>";
+        echo "<p>".$comment_row['comment']."</p>";
+       }
       ?>
             <form class="comments" action="process.php" method="post">
                 <textarea name="comment" rows="3" cols="80" ></textarea>
                 <input type="submit" class = 'btn-comment' value="Post a Comment">
                 <input type="hidden" name='action' value="comment">
                 <input name="user_id" type="hidden" value="<?php echo $_SESSION['user_id'];?>" id="user_id">
-                <input name="message_id" type="hidden" value="<?php echo $message_row['id'];?>" id="message_id">
+                <input name="message_id" type="hidden" value="<?php echo $message_row['id'];?>">
             </form>
 <?php
     }
 
     ?>
+
+    <?php
+
+
+
+    ?>
+
   </div>
 </div> <!-- #main-container -->
 </body>
