@@ -25,10 +25,19 @@ require_once('connection.php');
         comment_user($_POST);
         header('Location: wall.php');
     }
+
+    elseif (isset($_POST['action'])&& $_POST['action']= "delete")
+    {
+        delete_comment($_POST);
+        header('Location: wall.php');
+    }
+
     elseif(isset($_GET['a'])&&$_GET['a']=='logoff')
     {
         session_destroy();
+        header('location: index.php');
     }
+
     else
     {
         header('location: index.php');
@@ -74,18 +83,23 @@ require_once('connection.php');
 
         else // insert data into database
         {
-            $query = "INSERT INTO users (first_name, last_name, email,  password, created_at, updated_at) VALUES('{$post['first_name']}', '{$post['last_name']}', '{$post['email']}', '{$post['password']}', NOW(), NOW())";
+            $first_name = escape_this_string($post['first_name']);
+            $last_name = escape_this_string($post['last_name']);
+            $email = escape_this_string($post['email']);
+            $password = md5($post['password']);
+            $query = "INSERT INTO users (first_name, last_name, email,  password, created_at, updated_at) VALUES('{$first_name}', '{$last_name}', '{$email}', '{$password}', NOW(), NOW())";
             run_mysql_query($query);
-            $_SESSION['success_message'] = "User succfully created!";
-            header('location: index.php');
-            die();
+            $_SESSION['success_message'] = "User successfully created!";
+            header('location: wall.php');
         }
     }
 
     function login_user($post)
     {
-        $query = "SELECT * FROM users WHERE users.email = '{$post['email']}' AND
-                    users.password = '{$post['password']}'";
+        $email = escape_this_string($post['email']);
+        $password = md5($post['password']);
+        $query = "SELECT * FROM users WHERE users.email = '{$email}' AND
+                    users.password = '{$password}'";
         $user = fetch_all($query);
         if(count($user) > 0)
         {
@@ -93,6 +107,8 @@ require_once('connection.php');
             $_SESSION['first_name'] = $user[0]['first_name'];
             $_SESSION['last_name'] = $user[0]['last_name'];
             $_SESSION['logged_in'] = TRUE;
+            // var_dump($_SESSION);
+            // die();
             header('location: wall.php');
         }
 
@@ -142,12 +158,18 @@ require_once('connection.php');
         {
             $query_comment = "INSERT INTO comments (comment, message_id, user_id, created_at, updated_at) VALUES('{$post['comment']}', {$post['message_id']},{$post['user_id']}, NOW(), NOW())";
             if(!run_mysql_query($query_comment)){
-                $_SESSION['errors'][] = 'Query has failed.';
+                $_SESSION['errors'][] = 'Comment was not posted.';
                 $_SESSION['errors'][] = $query_comment;
             }
-            ;
+
             $_SESSION['success_comment_posted'] = "Comment successfully posted!";
             header('location: wall.php');
         }
+    };
+
+    function delete_comment($post)
+    {
+        $query_delete_comment = "DELETE from comments WHERE comments.id = ".$_POST['comment_id'];
+        run_mysql_query($query_delete_comment);
     }
 ?>

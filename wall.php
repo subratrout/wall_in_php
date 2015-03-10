@@ -40,16 +40,20 @@
 <body>
 <div class="head">
     <h1>CodingDojo Wall</h1>
-    <div class="profile"><?php
-       // echo "HI {$_SESSION['first_name']} {$_SESSION['last_name']}!";
-       echo "<a href = 'process.php?a=logoff'>LOG OFF</a>" ?>
+    <div class="profile">
+
+      <?php
+        // var_dump($_SESSION);
+       echo "Hi {$_SESSION['first_name']} {$_SESSION['last_name']}!";
+       echo "<a href = 'process.php?a=logoff'>LOG OFF</a>"
+       ?>
     </div>
     <h2>Post a Message:</h2>
             <form class="message" action="process.php" method="post">
                 <textarea name="message" rows="5" cols="100"></textarea>
-                <input type="submit" class = 'btn-message' value="Post a message">
+                <input type="submit" class = "btn-message" value="Post a message">
                 <input type="hidden" name='action' value="message">
-                <input name="user_id" type="hidden" value="<?php echo $_SESSION['user_id'];?>" id="user_id">
+                <input name="user_id" type="hidden" value =<?php echo  $_SESSION['user_id']; ?>>
             </form>
 
 </div>
@@ -68,30 +72,35 @@
       echo "<p>".$message_row['message']."</p>";
 
 
-$query_comments = "SELECT users.first_name, users.last_name, comments.comment, comments.created_at, comments.message_id, messages.user_id FROM users LEFT JOIN messages on users.id=messages.user_id LEFT JOIN comments on comments.message_id=messages.id where messages.id={$message_row['id']}";
+$query_comments = "SELECT users.first_name, users.last_name, comments.id, comments.comment, comments.created_at, comments.message_id, comments.user_id FROM comments LEFT JOIN users on comments.user_id=users.id where comments.message_id={$message_row['id']}";
+
   $comments_results = fetch_all($query_comments);
 
        foreach ($comments_results as $comment_row)
        {
-        echo "<p>".$comment_row['first_name']." ".$comment_row['last_name']."-".$comment_row['created_at']."</p>";
+        echo "<p>".$comment_row['first_name']." ".$comment_row['last_name']."-".date_format(date_create($comment_row['created_at']),'g:ia l jS F Y')."</p>";
         echo "<p>".$comment_row['comment']."</p>";
-       }
+            if(isset($_SESSION['user_id']) && ($_SESSION['user_id'] == $comment_row['user_id']) ) {
+
+        ?>
+            <form class="delete" action="process.php" method="post">
+                <input type="submit" class = 'btn-delete' value="Delete Comment">
+                <input type="hidden" name='action' value="delete">
+                <input name="user_id" type="hidden" value="<?php echo $_SESSION['user_id'];?>">
+                <input name="comment_id" type="hidden" value="<?php echo $comment_row['id'];?>">
+            </form>
+            <?php } ?>
+      <?php }
       ?>
             <form class="comments" action="process.php" method="post">
                 <textarea name="comment" rows="3" cols="80" ></textarea>
                 <input type="submit" class = 'btn-comment' value="Post a Comment">
                 <input type="hidden" name='action' value="comment">
-                <input name="user_id" type="hidden" value="<?php echo $_SESSION['user_id'];?>" id="user_id">
+                <input name="user_id" type="hidden" value="<?php echo $_SESSION['user_id'];?>">
                 <input name="message_id" type="hidden" value="<?php echo $message_row['id'];?>">
             </form>
 <?php
     }
-
-    ?>
-
-    <?php
-
-
 
     ?>
 
